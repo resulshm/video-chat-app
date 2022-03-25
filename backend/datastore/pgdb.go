@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type PgAccess struct {
@@ -24,7 +24,7 @@ func NewPgAccess(conf *utils.Config) (pg *PgAccess, err error) {
 	pool, err = pgxpool.Connect(context.Background(), utils.Conf.DbConn)
 	if err != nil {
 		eMsg := "error creating connection pool"
-		log.WithError(err).Error(eMsg)
+		logrus.WithError(err).Error(eMsg)
 		err = errors.Wrap(err, eMsg)
 		return
 	}
@@ -32,7 +32,7 @@ func NewPgAccess(conf *utils.Config) (pg *PgAccess, err error) {
 	return
 }
 
-func (d *PgAccess) runInTx(ctx context.Context, pTx pgx.Tx, clog *log.Entry, f pgxWithTx) (err error) {
+func (d *PgAccess) runInTx(ctx context.Context, pTx pgx.Tx, clog *logrus.Entry, f pgxWithTx) (err error) {
 	var conn *pgxpool.Conn
 	defer func() {
 		if conn != nil {
@@ -86,7 +86,7 @@ func (d *PgAccess) runInTx(ctx context.Context, pTx pgx.Tx, clog *log.Entry, f p
 	return
 }
 
-func (d *PgAccess) runQuery(ctx context.Context, clog *log.Entry, f pgxQuery) (err error) {
+func (d *PgAccess) runQuery(ctx context.Context, clog *logrus.Entry, f pgxQuery) (err error) {
 	var conn *pgxpool.Conn
 	defer func() {
 		if conn != nil {
