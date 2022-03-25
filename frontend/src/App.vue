@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router";
+import { RouterView } from "vue-router";
 </script>
 
 <template>
-  <div class="mt-10">
-    <RouterLink to="/">Home</RouterLink>
+  <div class="min-h-screen w-full flex justify-center items-center">
+    <RouterView />
   </div>
-
-  <RouterView />
 </template>
