@@ -5,6 +5,25 @@ export default {
 </script>
 
 <script setup lang="ts">
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
+const route = useRoute();
+const conn = ref();
+const callInf: any = {
+  offerCandidates: [],
+  offer: {
+    sdp: null,
+    type: null,
+  },
+  answerCandidates: [],
+  answer: {
+    sdp: null,
+    type: null,
+  },
+};
+let localStream: any = null;
+let remoteStream: any = null;
+
 const servers = {
   iceServers: [
     {
@@ -14,23 +33,27 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 const pc = new RTCPeerConnection(servers);
-let conn = new WebSocket(`ws://localhost:8080`);
-let localStream: any = null;
-let remoteStream: any = null;
 
-const callDoc: any = {
-  name: "",
-  offerCandidates: [],
-  answerCandidates: [],
-  offer: {
-    sdp: null,
-    type: null,
-  },
-};
+onMounted(() => {
+  conn.value = new WebSocket(
+    `ws://127.0.0.1:8080/api/v1/join/${route.params.id}`
+  );
+  conn.value.onopen = () => {
+    sendMessage({ join: true });
+  };
+  conn.value.onerror = (error: any) => {
+    console.error(error);
+  };
 
-function sendMessage() {
-  // Send message to the server via Websocket
+  conn.value.onmessage = (msg: any) => {
+    console.log("Got message", msg.data);
+  };
+});
+
+function sendMessage(message: any) {
+  conn.value.send(JSON.stringify(message));
 }
+
 function handleMedia() {
   localStream = navigator.mediaDevices.getUserMedia({
     audio: true,
@@ -52,15 +75,15 @@ function handleMedia() {
 
 async function createOffer() {
   pc.onicecandidate = (event) => {
-    event.candidate && callDoc.offerCandidates.add(event.candidate.toJSON());
+    event.candidate && callInf.offerCandidates.add(event.candidate.toJSON());
   };
 
   const offerDescription = await pc.createOffer();
   await pc.setLocalDescription(offerDescription);
 
-  callDoc.offer.sdp = offerDescription.sdp;
-  callDoc.offer.type = offerDescription.type;
-  sendMessage();
+  callInf.offer.sdp = offerDescription.sdp;
+  callInf.offer.type = offerDescription.type;
+  // sendMessage();
 }
 
 async function handleAnswer(answer: any) {
@@ -77,9 +100,9 @@ async function handleIceCandidate(data: any) {
 
 async function answerOffer() {
   pc.onicecandidate = (event) => {
-    event.candidate && callDoc.answerCandidates.add(event.candidate.toJSON());
+    event.candidate && callInf.answerCandidates.add(event.candidate.toJSON());
   };
-  const offerDescription = callDoc.offer;
+  const offerDescription = callInf.offer;
   await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
 
   const answerDescription = await pc.createAnswer();
@@ -90,7 +113,7 @@ async function answerOffer() {
     sdp: answerDescription.sdp,
   };
 
-  sendMessage();
+  // sendMessage();
 }
 </script>
 

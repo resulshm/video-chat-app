@@ -6,16 +6,25 @@ export default {
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { createRoom } from "@/api/room";
 import BaseInput from "@/components/BaseComponents/BaseInput.vue";
-const name = ref<string>();
+import { useRouter } from "vue-router";
 const room = ref<string>();
+const router = useRouter();
+async function onSubmit() {
+  const formData = new FormData();
+  formData.append("name", "Web");
+  const newRoom = await createRoom(formData);
+  console.log(newRoom);
+  router.push(`/${newRoom.data.data.room_id}`);
+}
 </script>
 
 <template>
   <div>
-    <form>
-      <BaseInput v-model="name" />
+    <form @submit.prevent="onSubmit">
       <BaseInput v-model="room" />
+      <button>Create room</button>
     </form>
   </div>
 </template>
