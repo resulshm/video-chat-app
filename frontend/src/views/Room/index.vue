@@ -9,18 +9,6 @@ import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 const route = useRoute();
 const conn = ref();
-const callInf: any = {
-  offerCandidates: [],
-  offer: {
-    sdp: null,
-    type: null,
-  },
-  answerCandidates: [],
-  answer: {
-    sdp: null,
-    type: null,
-  },
-};
 let localStream: any = null;
 let remoteStream: any = null;
 
@@ -33,7 +21,7 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 const pc = new RTCPeerConnection(servers);
-
+pc.onicecandidate = handleIceCandidate;
 onMounted(() => {
   conn.value = new WebSocket(
     `ws://127.0.0.1:8080/api/v1/join/${route.params.id}`
@@ -45,8 +33,22 @@ onMounted(() => {
     console.error(error);
   };
 
-  conn.value.onmessage = (msg: any) => {
-    console.log("Got message", msg.data);
+  conn.value.onmessage = (e: any) => {
+    console.log("Got message", e.data);
+    const message = JSON.parse(e.data);
+    if (message.join) {
+      createOffer();
+    }
+    if (message.callInf.offer) {
+      answerOffer(message.callInf);
+    }
+    if (message.callInf.answer) {
+      handleAnswer(message.callInf);
+    }
+    if (message.icecandidate) {
+      const candidate = new RTCIceCandidate(message.icecandidate);
+      pc.addIceCandidate(message.icecandidate);
+    }
   };
 });
 
@@ -74,16 +76,14 @@ function handleMedia() {
 }
 
 async function createOffer() {
-  pc.onicecandidate = (event) => {
-    event.candidate && callInf.offerCandidates.add(event.candidate.toJSON());
-  };
+  const offer: any = {};
 
   const offerDescription = await pc.createOffer();
   await pc.setLocalDescription(offerDescription);
 
-  callInf.offer.sdp = offerDescription.sdp;
-  callInf.offer.type = offerDescription.type;
-  // sendMessage();
+  offer.sdp = offerDescription.sdp;
+  offer.type = offerDescription.type;
+  sendMessage({ offer });
 }
 
 async function handleAnswer(answer: any) {
@@ -93,17 +93,12 @@ async function handleAnswer(answer: any) {
   }
 }
 
-async function handleIceCandidate(data: any) {
-  const candidate = new RTCIceCandidate(data);
-  pc.addIceCandidate(candidate);
+async function handleIceCandidate(event: any) {
+  event.candidate && sendMessage({ candidate: event.candidate });
 }
 
-async function answerOffer() {
-  pc.onicecandidate = (event) => {
-    event.candidate && callInf.answerCandidates.add(event.candidate.toJSON());
-  };
-  const offerDescription = callInf.offer;
-  await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
+async function answerOffer(offer: any) {
+  await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
   const answerDescription = await pc.createAnswer();
   await pc.setLocalDescription(answerDescription);
@@ -113,7 +108,7 @@ async function answerOffer() {
     sdp: answerDescription.sdp,
   };
 
-  // sendMessage();
+  sendMessage({ answer });
 }
 </script>
 
