@@ -23,20 +23,22 @@ const servers = {
 const pc = new RTCPeerConnection(servers);
 pc.onicecandidate = handleIceCandidate;
 onMounted(() => {
+  handleMedia();
   conn.value = new WebSocket(
     `ws://127.0.0.1:8080/api/v1/join/${route.params.id}`
   );
   conn.value.onopen = () => {
     sendMessage({ join: true });
+    console.log("Connected");
   };
   conn.value.onerror = (error: any) => {
     console.error(error);
   };
-
   conn.value.onmessage = (e: any) => {
     console.log("Got message", e.data);
     const message = JSON.parse(e.data);
     if (message.join) {
+      console.log("Joined bir pituh");
       createOffer();
     }
     if (message.callInf.offer) {
