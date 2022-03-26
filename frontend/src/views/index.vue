@@ -15,7 +15,6 @@ async function onSubmit() {
   const formData = new FormData();
   formData.append("name", "Web");
   const newRoom = await createRoom(formData);
-  console.log(newRoom);
   router.push(`/${newRoom.data.data.room_id}`);
 }
 </script>
