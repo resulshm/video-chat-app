@@ -1,4 +1,3 @@
-import type { Plugin } from "vue";
 class Api {
   async post(url: string, data?: any) {
     try {
@@ -11,13 +10,6 @@ class Api {
   }
 }
 
-const $api = new Api();
+const api = new Api();
 
-const plugin: Plugin = {
-  install(app) {
-    app.config.globalProperties.$api = $api;
-  },
-};
-
-export default plugin;
-export { $api };
+export { api };
