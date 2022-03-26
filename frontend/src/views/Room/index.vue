@@ -21,9 +21,12 @@ const servers = {
   iceCandidatePoolSize: 10,
 };
 const pc = new RTCPeerConnection(servers);
-pc.onicecandidate = handleIceCandidate;
+pc.onicecandidate = (event) => {
+  event.candidate &&
+    sendMessage({ candidate: event.candidate, type: "candidate" });
+};
 onMounted(() => {
-  handleMedia();
+  // handleMedia();
   conn.value = new WebSocket(
     `ws://127.0.0.1:8080/api/v1/join/${route.params.id}`
   );
@@ -41,15 +44,14 @@ onMounted(() => {
       console.log("Joined bir pituh");
       createOffer();
     }
-    if (message.callInf.offer) {
-      answerOffer(message.callInf);
+    if (message.type === "offer") {
+      answerOffer(message.offer);
     }
-    if (message.callInf.answer) {
-      handleAnswer(message.callInf);
+    if (message === "answer") {
+      handleAnswer(message.answer);
     }
-    if (message.icecandidate) {
-      const candidate = new RTCIceCandidate(message.icecandidate);
-      pc.addIceCandidate(message.icecandidate);
+    if (message.type === "candidate") {
+      handleIceCandidate(message.candidate);
     }
   };
 });
@@ -78,39 +80,25 @@ function handleMedia() {
 }
 
 async function createOffer() {
-  const offer: any = {};
-
-  const offerDescription = await pc.createOffer();
-  await pc.setLocalDescription(offerDescription);
-
-  offer.sdp = offerDescription.sdp;
-  offer.type = offerDescription.type;
-  sendMessage({ offer });
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  sendMessage({ offer, type: "offer" });
 }
 
 async function handleAnswer(answer: any) {
-  if (!pc.currentRemoteDescription && answer) {
-    const answerDescription = new RTCSessionDescription(answer);
-    pc.setRemoteDescription(answerDescription);
-  }
+  pc.setRemoteDescription(new RTCSessionDescription(answer));
 }
 
-async function handleIceCandidate(event: any) {
-  event.candidate && sendMessage({ candidate: event.candidate });
+async function handleIceCandidate(candidate: any) {
+  pc.addIceCandidate(new RTCIceCandidate(candidate));
 }
 
 async function answerOffer(offer: any) {
   await pc.setRemoteDescription(new RTCSessionDescription(offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
 
-  const answerDescription = await pc.createAnswer();
-  await pc.setLocalDescription(answerDescription);
-
-  const answer = {
-    type: answerDescription.type,
-    sdp: answerDescription.sdp,
-  };
-
-  sendMessage({ answer });
+  sendMessage({ answer, type: "answer" });
 }
 </script>
 
