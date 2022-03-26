@@ -71,24 +71,6 @@ func (r *RoomsStorage) AddParticipant(roomId string, conn *websocket.Conn) {
 
 var broadcast = make(chan broadcastMsg)
 
-func broadcaster() {
-	for {
-		msg := <-broadcast
-
-		for _, client := range AllRooms.Rooms[msg.RoomID] {
-			if client.Conn != msg.Client {
-				err := client.Conn.WriteJSON(msg.Message)
-				if err != nil {
-					logrus.WithError(err)
-					client.Conn.Close()
-					return
-				}
-			}
-		}
-
-	}
-}
-
 func (s *Server) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 	roomId := mux.Vars(r)["room_id"]
 	_, err := uuid.FromString(roomId)
@@ -122,7 +104,23 @@ func (s *Server) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 
 	AllRooms.AddParticipant(roomId, ws)
 
-	go broadcaster()
+	go func() {
+		for {
+			msg := <-broadcast
+
+			for _, client := range AllRooms.Rooms[msg.RoomID] {
+				if client.Conn != msg.Client {
+					err := client.Conn.WriteJSON(msg.Message)
+					if err != nil {
+						logrus.WithError(err)
+						client.Conn.Close()
+						return
+					}
+				}
+			}
+
+		}
+	}()
 
 	for {
 		var msg broadcastMsg

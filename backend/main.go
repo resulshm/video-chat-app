@@ -32,6 +32,8 @@ func main() {
 		log.WithError(err).Panic("could't read configurition variables")
 	}
 
+	web.AllRooms.Rooms = make(map[string][]web.Participant)
+
 	setupServer(quitChan, signalChan, utils.Conf)
 }
 
