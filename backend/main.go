@@ -27,7 +27,7 @@ func main() {
 	log.SetFormatter(customFormatter)
 	log.SetLevel(log.DebugLevel)
 
-	err := utils.ReadConfig()
+	err := utils.ReadConfig("config.json")
 	if err != nil {
 		log.WithError(err).Panic("could't read configurition variables")
 	}
