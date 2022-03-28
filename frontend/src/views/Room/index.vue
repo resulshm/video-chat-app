@@ -24,9 +24,7 @@ onMounted(async () => {
   const cameras = allDevices.filter((device) => device.kind == "videoinput");
   const localStream = await navigator.mediaDevices.getUserMedia({
     audio: true,
-    video: {
-      deviceId: cameras[1].deviceId,
-    },
+    video: true,
   });
   localStream.getTracks().forEach((track: any) => {
     pc.addTrack(track, localStream);
@@ -56,10 +54,10 @@ onMounted(async () => {
       await createOffer();
     }
     if (message.type === "offer") {
-      answerOffer(message.offer);
+      await answerOffer(message.offer);
     }
     if (message.type === "answer") {
-      await handleAnswer(message.answer);
+      handleAnswer(message.answer);
     }
     if (message.type === "candidate") {
       await handleIceCandidate(message.candidate);
