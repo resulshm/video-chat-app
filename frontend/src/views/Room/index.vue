@@ -9,49 +9,54 @@ import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 const route = useRoute();
 const conn = ref();
-let remoteStream: any = ref();
-let localStream: any = ref();
-let localVideo: any = ref();
 const pc = new RTCPeerConnection({
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 });
-
+const remoteVideo: any = ref();
+const localVideo: any = ref();
 pc.onicecandidate = (event) => {
   event.candidate &&
     sendMessage({ candidate: event.candidate, type: "candidate" });
 };
-onMounted(async () => {
-  localStream.value = await navigator.mediaDevices.getUserMedia({
-    audio: true,
-    video: true,
-  });
 
-  localStream.value.getTracks().forEach((track: any) => {
-    pc.addTrack(track, localStream.value);
-    localVideo.value.srcObject = track;
+onMounted(async () => {
+  const allDevices = await navigator.mediaDevices.enumerateDevices();
+  const cameras = allDevices.filter((device) => device.kind == "videoinput");
+  const localStream = await navigator.mediaDevices.getUserMedia({
+    audio: true,
+    video: {
+      deviceId: cameras[1].deviceId,
+    },
   });
+  localStream.getTracks().forEach((track: any) => {
+    pc.addTrack(track, localStream);
+  });
+  localVideo.value.srcObject = localStream;
+
   pc.ontrack = (e) => {
-    remoteStream.value.srcObject = e.streams[0];
-    console.log("Remote video", remoteStream.value);
-    console.log(pc);
+    remoteVideo.value.srcObject = e.streams[0];
   };
+
   conn.value = new WebSocket(
     `ws://127.0.0.1:8080/api/v1/join/${route.params.id}`
   );
+
   conn.value.onopen = () => {
-    sendMessage({ join: true });
+    sendMessage({ joined: true });
   };
+
   conn.value.onerror = (error: any) => {
     console.error(error);
   };
+
   conn.value.onmessage = async (e: any) => {
     const message = JSON.parse(e.data);
-    if (message.join) {
-      console.log("Joined");
+    console.log(message);
+    if (message.joined) {
       await createOffer();
     }
     if (message.type === "offer") {
-      await answerOffer(message.offer);
+      answerOffer(message.offer);
     }
     if (message.type === "answer") {
       await handleAnswer(message.answer);
@@ -72,12 +77,12 @@ async function createOffer() {
   sendMessage({ offer, type: "offer" });
 }
 
-async function handleAnswer(answer: any) {
+function handleAnswer(answer: any) {
   pc.setRemoteDescription(new RTCSessionDescription(answer));
 }
 
 async function handleIceCandidate(candidate: any) {
-  pc.addIceCandidate(new RTCIceCandidate(candidate));
+  await pc.addIceCandidate(new RTCIceCandidate(candidate));
 }
 
 async function answerOffer(offer: any) {
@@ -91,7 +96,7 @@ async function answerOffer(offer: any) {
 
 <template>
   <div>
-    <video :src="remoteStream" autoplay controls></video>
-    <video :src="localVideo" autoplay controls></video>
+    <video ref="remoteVideo" autoplay controls></video>
+    <video ref="localVideo" autoplay controls></video>
   </div>
 </template>
