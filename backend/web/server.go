@@ -25,6 +25,7 @@ func NewRouter(s *Server) *mux.Router {
 
 	r.HandleFunc("/api/v1/room", s.CreateRoomHandler).Methods("POST")
 	r.HandleFunc("/api/v1/join/{room_id}", s.JoinRoomHandler)
+	r.HandleFunc("/api/v1/invite", s.SendInvitationHandler).Methods("POST")
 
 	return r
 }

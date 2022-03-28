@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"video-chat-app/utils"
@@ -9,6 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
+	mail "github.com/xhit/go-simple-mail/v2"
 )
 
 var AllRooms RoomsStorage
@@ -136,5 +138,70 @@ func (s *Server) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 
 		broadcast <- msg
 	}
+}
 
+func (s *Server) SendInvitationHandler(w http.ResponseWriter, r *http.Request) {
+	var to string
+	if utils.IsEmailValid(r.FormValue("to")) {
+		to = r.FormValue("to")
+	} else {
+		eMsg := "Invalid email address"
+		logrus.Error(eMsg)
+		err := utils.ErrBadRequest
+		SendResponse(w, err, nil)
+		return
+	}
+
+	subject := r.FormValue("subject")
+	if subject == "" {
+		eMsg := "Subject is empty"
+		logrus.Error(eMsg)
+		err := utils.ErrBadRequest
+		SendResponse(w, err, nil)
+		return
+	}
+
+	content := r.FormValue("content")
+	if content == "" {
+		eMsg := "Content is empty"
+		logrus.Error(eMsg)
+		err := utils.ErrBadRequest
+		SendResponse(w, err, nil)
+		return
+	}
+	go SendEmail(to, subject, content)
+	err := utils.ErrOK
+	SendResponse(w, err, nil)
+}
+
+func SendEmail(to, subject, content string) {
+	srv := mail.NewSMTPClient()
+	srv.Host = utils.Conf.Host
+	srv.Port = utils.Conf.Port
+	srv.Username = utils.Conf.Username
+	srv.Password = utils.Conf.Password
+	srv.Encryption = mail.EncryptionTLS
+
+	smtpClient, err := srv.Connect()
+	if err != nil {
+		eMsg := "Couldn't connect to SMTP server"
+		logrus.WithError(err).Error(eMsg)
+		return
+	}
+
+	email := mail.NewMSG()
+	from := fmt.Sprintf("RS video-chat app <%s>", utils.Conf.Username)
+	email.SetFrom(from)
+	email.AddTo(to)
+	email.SetSubject(subject)
+	email.SetBody(mail.TextHTML, content)
+
+	err = email.Send(smtpClient)
+	if err != nil {
+		eMsg := "Could't send email"
+		logrus.WithError(err).Error(eMsg)
+		return
+	}
+
+	logrus.Info("Email is sended successfully...")
 }
