@@ -28,8 +28,8 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="w-full h-screen flex flex-row justify-center items-center">
-    <div class="w-1/2 px-20">
+  <div class="w-full h-full flex flex-row justify-center items-center">
+    <div class="w-1/2 px-20 pt-20">
       <div class="text-[2.9rem] leading-[1.2] mb-6">
         Premium video meetings <br />
         Now free for everyone
@@ -61,10 +61,14 @@ async function onSubmit() {
     </div>
     <div class="w-1/2 lg:h-screen flex justify-center items-center">
       <div class="relative">
-        <div class="absolute left-[-10%] top-[50%]">
+        <div
+          class="absolute left-[-10%] top-[50%] active:bg-gray-300 rounded-full p-1 cursor-pointer transition-all duration-100 ease-in-out"
+        >
           <IconChevronLeft />
         </div>
-        <div class="absolute right-[-10%] top-[50%]">
+        <div
+          class="absolute right-[-10%] top-[50%] active:bg-gray-300 rounded-full p-1 cursor-pointer transition-all duration-100 ease-in-out"
+        >
           <IconChevronRight />
         </div>
         <img
@@ -75,7 +79,10 @@ async function onSubmit() {
           class="absolute w-full bottom-[-30%] flex justify-center items-center flex-col"
         >
           <p class="text-[1.5rem] font-normal">Get a link you can share</p>
-          <p>Click <span>New meeting</span> to get a link you can send to</p>
+          <p>
+            Click <span class="font-bold">New meeting</span> to get a link you
+            can send to
+          </p>
           <p>people you want meet them</p>
         </div>
       </div>
