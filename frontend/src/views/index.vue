@@ -17,8 +17,8 @@ const room = ref<string>();
 const router = useRouter();
 async function onSubmit() {
   const formData = new FormData();
-  if (room.value) {
-    formData.append("name", room.value);
+  if (!room.value) {
+    formData.append("name", "New meet");
   }
   const response = await createRoom(formData);
   if (response.success) {

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
-import TheNavbar from "@/components/AppComponents/TheNavbar.vue";
+import TheHeader from "@/components/AppComponents/TheHeader.vue";
 </script>
 
 <template>
   <div class="w-screen h-screen px-20 relative">
     <div class="absolute top-0 left-0">
-      <TheNavbar />
+      <TheHeader />
     </div>
     <div class="w-full h-full flex justify-center items-center">
       <RouterView />
