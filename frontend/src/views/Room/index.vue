@@ -20,8 +20,6 @@ pc.onicecandidate = (event) => {
 };
 
 onMounted(async () => {
-  const allDevices = await navigator.mediaDevices.enumerateDevices();
-  const cameras = allDevices.filter((device) => device.kind == "videoinput");
   const localStream = await navigator.mediaDevices.getUserMedia({
     audio: true,
     video: true,
@@ -49,7 +47,6 @@ onMounted(async () => {
 
   conn.value.onmessage = async (e: any) => {
     const message = JSON.parse(e.data);
-    console.log(message);
     if (message.joined) {
       await createOffer();
     }

@@ -54,6 +54,9 @@ module.exports = {
       rose: colors.rose,
       "c-black": "#0E0E0E",
       "c-gray": "#bbbbbb",
+      "c-blue": {
+        100: "#1a73e8",
+      },
       "custom-red": {
         100: "#FF0000",
       },
