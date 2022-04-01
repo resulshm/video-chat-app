@@ -7,13 +7,14 @@ export default {
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import type { Message } from "@/types/index";
 const route = useRoute();
 const conn = ref();
 const pc = new RTCPeerConnection({
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 });
-const remoteVideo: any = ref();
-const localVideo: any = ref();
+const remoteVideo = ref<HTMLVideoElement | null>();
+const localVideo = ref<HTMLVideoElement | null>();
 pc.onicecandidate = (event) => {
   event.candidate &&
     sendMessage({ candidate: event.candidate, type: "candidate" });
@@ -27,10 +28,10 @@ onMounted(async () => {
   localStream.getTracks().forEach((track: any) => {
     pc.addTrack(track, localStream);
   });
-  localVideo.value.srcObject = localStream;
+  if (localVideo.value) localVideo.value.srcObject = localStream;
 
   pc.ontrack = (e) => {
-    remoteVideo.value.srcObject = e.streams[0];
+    if (remoteVideo.value) remoteVideo.value.srcObject = e.streams[0];
   };
 
   conn.value = new WebSocket(
@@ -45,22 +46,22 @@ onMounted(async () => {
     console.error(error);
   };
 
-  conn.value.onmessage = async (e: any) => {
+  conn.value.onmessage = async (e: MessageEvent) => {
     try {
-      let message = await JSON.parse(e.data);
+      let message: Message = await JSON.parse(e.data);
       if (message.joined) {
         createOffer();
       }
-      if (message.type === "offer") {
+      if (message.type === "offer" && message.offer) {
         answerOffer(message.offer);
       }
-      if (message.type === "answer") {
+      if (message.type === "answer" && message.answer) {
         handleAnswer(message.answer);
       }
-      if (message.type === "candidate") {
+      if (message.type === "candidate" && message.candidate) {
         handleIceCandidate(message.candidate);
       }
-      if (message.type === "leave") {
+      if (message.leave) {
         handleLeave();
       }
     } catch (err) {
@@ -87,11 +88,11 @@ async function createOffer() {
   }
 }
 
-function handleAnswer(answer: any) {
+function handleAnswer(answer: RTCSessionDescriptionInit) {
   pc.setRemoteDescription(new RTCSessionDescription(answer));
 }
 
-async function handleIceCandidate(candidate: any) {
+async function handleIceCandidate(candidate: RTCIceCandidateInit) {
   try {
     await pc.addIceCandidate(new RTCIceCandidate(candidate));
   } catch (err) {
@@ -99,7 +100,7 @@ async function handleIceCandidate(candidate: any) {
   }
 }
 
-async function answerOffer(offer: any) {
+async function answerOffer(offer: RTCSessionDescriptionInit) {
   try {
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await pc.createAnswer();
@@ -116,6 +117,7 @@ function handleLeave() {
   pc.close();
   pc.onicecandidate = null;
   pc.ontrack = null;
+  sendMessage({ leave: true });
 }
 </script>
 

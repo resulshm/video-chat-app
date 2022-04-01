@@ -1,5 +1,5 @@
 class Api {
-  async post(url: string, data?: any) {
+  async post(url: string, data: FormData) {
     try {
       const response = await fetch(url, { method: "POST", body: data });
       return { success: true as const, data: (await response.json()).data };
