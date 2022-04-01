@@ -1,5 +1,5 @@
 class Api {
-  async post(url: string, data: FormData) {
+  static async post(url: string, data: FormData) {
     try {
       const response = await fetch(url, { method: "POST", body: data });
       return { success: true as const, data: (await response.json()).data };
@@ -10,6 +10,4 @@ class Api {
   }
 }
 
-const api = new Api();
-
-export { api };
+export { Api as api };
