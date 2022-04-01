@@ -46,25 +46,35 @@ onMounted(async () => {
   };
 
   conn.value.onmessage = (e: any) => {
-    let message;
-    message = JSON.parse(e.data);
-    if (message.joined) {
-      createOffer();
-    }
-    if (message.type === "offer") {
-      answerOffer(message.offer);
-    }
-    if (message.type === "answer") {
-      handleAnswer(message.answer);
-    }
-    if (message.type === "candidate") {
-      handleIceCandidate(message.candidate);
+    try {
+      let message = JSON.parse(e.data);
+      if (message.joined) {
+        createOffer();
+      }
+      if (message.type === "offer") {
+        answerOffer(message.offer);
+      }
+      if (message.type === "answer") {
+        handleAnswer(message.answer);
+      }
+      if (message.type === "candidate") {
+        handleIceCandidate(message.candidate);
+      }
+      if (message.type === "leave") {
+        handleLeave();
+      }
+    } catch (err) {
+      console.error("Can't handle message", err);
     }
   };
 });
 
 function sendMessage(message: any) {
-  conn.value.send(JSON.stringify(message));
+  if (conn.value.readyState === conn.value.OPEN) {
+    conn.value.send(JSON.stringify(message));
+  } else {
+    console.error("No connection");
+  }
 }
 
 async function createOffer() {
@@ -94,17 +104,28 @@ async function answerOffer(offer: any) {
     await pc.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-
     sendMessage({ answer, type: "answer" });
   } catch (err) {
     console.log("Can't anwser");
   }
 }
+
+function handleLeave() {
+  remoteVideo.value = null;
+  localVideo.value = null;
+  pc.close();
+  pc.onicecandidate = null;
+  pc.ontrack = null;
+}
 </script>
 
 <template>
-  <div>
-    <video ref="remoteVideo" autoplay controls></video>
-    <video ref="localVideo" autoplay controls></video>
+  <div class="w-full h-full flex flex-row justify-center items-center">
+    <div>
+      <video ref="remoteVideo" autoplay controls></video>
+    </div>
+    <div>
+      <video ref="localVideo" autoplay controls></video>
+    </div>
   </div>
 </template>
