@@ -45,19 +45,20 @@ onMounted(async () => {
     console.error(error);
   };
 
-  conn.value.onmessage = async (e: any) => {
-    const message = JSON.parse(e.data);
+  conn.value.onmessage = (e: any) => {
+    let message;
+    message = JSON.parse(e.data);
     if (message.joined) {
-      await createOffer();
+      createOffer();
     }
     if (message.type === "offer") {
-      await answerOffer(message.offer);
+      answerOffer(message.offer);
     }
     if (message.type === "answer") {
       handleAnswer(message.answer);
     }
     if (message.type === "candidate") {
-      await handleIceCandidate(message.candidate);
+      handleIceCandidate(message.candidate);
     }
   };
 });
@@ -67,9 +68,13 @@ function sendMessage(message: any) {
 }
 
 async function createOffer() {
-  const offer = await pc.createOffer();
-  await pc.setLocalDescription(offer);
-  sendMessage({ offer, type: "offer" });
+  try {
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    sendMessage({ offer, type: "offer" });
+  } catch (err) {
+    console.error("Can't create offer", err);
+  }
 }
 
 function handleAnswer(answer: any) {
@@ -77,15 +82,23 @@ function handleAnswer(answer: any) {
 }
 
 async function handleIceCandidate(candidate: any) {
-  await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  try {
+    await pc.addIceCandidate(new RTCIceCandidate(candidate));
+  } catch (err) {
+    console.error("Can't handle Ice candidate", err);
+  }
 }
 
 async function answerOffer(offer: any) {
-  await pc.setRemoteDescription(new RTCSessionDescription(offer));
-  const answer = await pc.createAnswer();
-  await pc.setLocalDescription(answer);
+  try {
+    await pc.setRemoteDescription(new RTCSessionDescription(offer));
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
 
-  sendMessage({ answer, type: "answer" });
+    sendMessage({ answer, type: "answer" });
+  } catch (err) {
+    console.log("Can't anwser");
+  }
 }
 </script>
 
