@@ -45,9 +45,9 @@ onMounted(async () => {
     console.error(error);
   };
 
-  conn.value.onmessage = (e: any) => {
+  conn.value.onmessage = async (e: any) => {
     try {
-      let message = JSON.parse(e.data);
+      let message = await JSON.parse(e.data);
       if (message.joined) {
         createOffer();
       }
