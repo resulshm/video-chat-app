@@ -17,9 +17,7 @@ const room = ref<string>();
 const router = useRouter();
 async function onSubmit() {
   const formData = new FormData();
-  if (!room.value) {
-    formData.append("name", "New meet");
-  }
+  formData.append("name", "New meet");
   const response = await createRoom(formData);
   if (response.success) {
     router.push(`/${response.data.room_id}`);
@@ -36,7 +34,7 @@ async function onSubmit() {
       </div>
       <div class="text-[1.1rem] text-gray-600 mb-13">
         We re-enginereed the service we built for secure business meetings,<br />
-        Google meet, to make it free and available for all
+        R&S meet, to make it free and available for all
       </div>
       <form class="mb-8" @submit.prevent="onSubmit">
         <div class="w-full h-full flex flex-row">
@@ -55,8 +53,12 @@ async function onSubmit() {
         <hr />
       </div>
       <div>
-        <a class="text-c-blue-100" href="google.com">Learn more</a>
-        about Google meet
+        <a
+          class="text-c-blue-100"
+          href="https://github.com/ResulShamuhammedov/video-chat-app"
+          >Learn more</a
+        >
+        about R&S meet
       </div>
     </div>
     <div class="w-1/2 lg:h-screen flex justify-center items-center">
