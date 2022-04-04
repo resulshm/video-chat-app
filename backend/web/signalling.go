@@ -16,7 +16,7 @@ import (
 var AllRooms RoomsStorage
 
 type RoomsStorage struct {
-	Mutex sync.Mutex
+	Mutex sync.RWMutex
 	Rooms map[string][]Participant
 }
 
@@ -112,12 +112,12 @@ func (s *Server) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 
 			for _, client := range AllRooms.Rooms[msg.RoomID] {
 				if client.Conn != msg.Client {
+					AllRooms.Mutex.Lock()
 					err := client.Conn.WriteJSON(msg.Message)
 					if err != nil {
-						logrus.WithError(err)
-						client.Conn.Close()
-						return
+						logrus.WithError(err).Error("Write JSON...")
 					}
+					AllRooms.Mutex.Unlock()
 				}
 			}
 
@@ -129,13 +129,13 @@ func (s *Server) JoinRoomHandler(w http.ResponseWriter, r *http.Request) {
 
 		err := ws.ReadJSON(&msg.Message)
 		if err != nil {
-			logrus.WithError(err)
+			logrus.WithError(err).Error("Read JSON...")
 			return
 		}
 
 		msg.Client = ws
 		msg.RoomID = roomId
-
+		// fmt.Println(msg.Message)
 		broadcast <- msg
 	}
 }
