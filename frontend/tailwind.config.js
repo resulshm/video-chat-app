@@ -11,6 +11,7 @@ module.exports = {
       xl: "1280px",
       "2xl": "1536px",
       "4K": "2560px",
+      "max-2xl": { max: "1535px" },
     },
     extend: {
       keyframes: {

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
-import TheHeader from "@/components/AppComponents/TheHeader.vue";
+import TheHeader from "@/components/app/TheHeader.vue";
 </script>
 
 <template>
-  <div class="w-screen h-screen px-20 relative">
+  <div class="px-20 relative">
     <div class="absolute top-0 left-0">
       <TheHeader />
     </div>

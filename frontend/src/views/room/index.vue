@@ -33,9 +33,8 @@ onMounted(async () => {
   pc.ontrack = (e) => {
     if (remoteVideo.value) remoteVideo.value.srcObject = e.streams[0];
   };
-
   conn.value = new WebSocket(
-    `ws://127.0.0.1:8080/api/v1/join/${route.params.id}`
+    `${import.meta.env.VITE_WEBSOCKET_URL}/api/v1/join/${route.params.id}`
   );
 
   conn.value.onopen = () => {
@@ -107,7 +106,7 @@ async function answerOffer(offer: RTCSessionDescriptionInit) {
     await pc.setLocalDescription(answer);
     sendMessage({ answer, type: "answer" });
   } catch (err) {
-    console.log("Can't anwser");
+    console.error("Can't anwser");
   }
 }
 
