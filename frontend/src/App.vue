@@ -4,18 +4,30 @@ import TheHeader from "@/components/app/TheHeader.vue";
 </script>
 
 <template>
-  <div class="px-20 relative">
-    <div class="absolute top-0 left-0">
+  <div>
+    <header class="header">
       <TheHeader />
-    </div>
-    <div class="w-full h-full flex justify-center items-center">
+    </header>
+    <main>
       <RouterView />
-    </div>
+    </main>
   </div>
 </template>
 
 <style>
 body {
   font-family: Arial, Helvetica, sans-serif;
+}
+header {
+  padding: 0 15px;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+main {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 </style>

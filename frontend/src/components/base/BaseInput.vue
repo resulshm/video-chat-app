@@ -12,11 +12,16 @@ const value = computed({
 });
 </script>
 <template>
-  <div>
-    <input
-      :placeholder="placeholder"
-      class="w-full h-12 border border-gray-400 outline-none px-3 py-3 rounded-[5px] focus:border-blue-500 focus:border-[2px] placeholder:text-gray-600 box-border"
-      v-model="value"
-    />
-  </div>
+  <input :placeholder="placeholder" v-model="value" />
 </template>
+
+<style>
+input {
+  border: 1px solid #ccc;
+  padding: 7.5px;
+  border-radius: 3px;
+}
+input:focus {
+  outline: none;
+}
+</style>

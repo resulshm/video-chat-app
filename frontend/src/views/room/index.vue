@@ -6,9 +6,11 @@ export default {
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import type { Message } from "@/types/index";
+import BaseButton from "@/components/base/BaseButton.vue";
 const route = useRoute();
+const router = useRouter();
 const conn = ref();
 const pc = new RTCPeerConnection({
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -19,15 +21,19 @@ pc.onicecandidate = (event) => {
   event.candidate &&
     sendMessage({ candidate: event.candidate, type: "candidate" });
 };
-
+let localStream: null | MediaStream = null;
 onMounted(async () => {
-  const localStream = await navigator.mediaDevices.getUserMedia({
-    audio: true,
-    video: true,
-  });
-  localStream.getTracks().forEach((track: any) => {
-    pc.addTrack(track, localStream);
-  });
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    localStream.getTracks().forEach((track: any) => {
+      pc.addTrack(track, localStream!);
+    });
+  } catch (err) {
+    console.log(err);
+  }
   if (localVideo.value) localVideo.value.srcObject = localStream;
 
   pc.ontrack = (e) => {
@@ -117,16 +123,36 @@ function handleLeave() {
   pc.onicecandidate = null;
   pc.ontrack = null;
   sendMessage({ leave: true });
+  if (localStream) {
+    localStream.getTracks().forEach(function (track) {
+      track.stop();
+    });
+  }
+  router.push("/");
 }
 </script>
 
 <template>
-  <div class="w-full h-full flex flex-row justify-center items-center">
-    <div>
-      <video ref="remoteVideo" autoplay controls></video>
-    </div>
-    <div>
-      <video ref="localVideo" autoplay controls></video>
-    </div>
+  <div class="container relative">
+    <video width="320" height="240" ref="remoteVideo" autoplay></video>
+    <video width="320" height="240" ref="localVideo" autoplay></video>
+    <BaseButton @click="handleLeave" color="red" class="leave-button"
+      >Leave</BaseButton
+    >
   </div>
 </template>
+
+<style scoped>
+.container {
+  display: flex;
+  gap: 10px;
+}
+video {
+  border: 1px solid #ccc;
+}
+.leave-button {
+  position: absolute;
+  right: 0%;
+  bottom: -15%;
+}
+</style>
