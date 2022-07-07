@@ -62,6 +62,5 @@ go run main.go
 
 - ✅ P2P video call;
 - ⭕ Invite friends with email;
-- ⭕ Group video call;
 - ⭕ Chat;
 - and whatever comes to our crazy minds😜
