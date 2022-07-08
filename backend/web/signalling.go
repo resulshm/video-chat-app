@@ -152,25 +152,29 @@ func (s *Server) SendInvitationHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subject := r.FormValue("subject")
-	if subject == "" {
-		eMsg := "Subject is empty"
+	from := r.FormValue("from")
+	if from == "" {
+		eMsg := "From is empty"
 		logrus.Error(eMsg)
 		err := utils.ErrBadRequest
 		SendResponse(w, err, nil)
 		return
 	}
 
-	content := r.FormValue("content")
-	if content == "" {
-		eMsg := "Content is empty"
+	code := r.FormValue("code")
+	_, err := uuid.FromString(code)
+	if err != nil {
+		eMsg := "Code is not correct"
 		logrus.Error(eMsg)
 		err := utils.ErrBadRequest
 		SendResponse(w, err, nil)
 		return
 	}
+
+	subject := fmt.Sprintf("Invitation from %s", from)
+	content := fmt.Sprintf("<p>Your friend wants to talk to you...<br> Enter the code in our app to join &#128521; <br> <strong>Code:</strong> %s</p>", code)
 	go SendEmail(to, subject, content)
-	err := utils.ErrOK
+	err = utils.ErrOK
 	SendResponse(w, err, nil)
 }
 
