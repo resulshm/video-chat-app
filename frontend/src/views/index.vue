@@ -29,14 +29,12 @@ const router = useRouter();
 async function onSubmit() {
   const formData = new FormData();
   formData.append("name", "New meet");
-  try {
-    const response = await createRoom(formData);
-    if (response.success) {
-      router.push(`/${response.data.room_id}`);
-    }
-  } catch (err) {
-    console.error(err);
+  const response = await createRoom(formData);
+  if (!response.success) {
+    console.error(response.err);
+    return;
   }
+  router.push(`/${response.data.room_id}`);
 }
 function join() {
   router.push(`/${meetingCode.value}`);
@@ -51,7 +49,9 @@ function join() {
     <div>
       <BaseInput v-model="meetingCode" placeholder="Enter code" />
     </div>
-    <div :style="{ visibility }" @click="join">Join</div>
+    <div :style="{ visibility }" @click="join" style="cursor: pointer">
+      Join
+    </div>
   </form>
 </template>
 

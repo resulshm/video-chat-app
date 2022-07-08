@@ -7,8 +7,13 @@ export default {
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import type { Message } from "@/types/index";
+import { inviteFriend } from "@/api/room";
 import BaseButton from "@/components/base/BaseButton.vue";
+import BaseModal from "../../components/base/BaseModal.vue";
+import BaseInput from "../../components/base/BaseInput.vue";
+import type { Message } from "@/types/index";
+const dialogState = ref(false);
+const friendMail = ref("");
 const route = useRoute();
 const router = useRouter();
 const conn = ref();
@@ -130,16 +135,47 @@ function handleLeave() {
   }
   router.push("/");
 }
+
+async function invite() {
+  dialogState.value = false;
+  const formData = new FormData();
+  formData.append("from", friendMail.value);
+  formData.append("to", friendMail.value);
+  formData.append("code", route.params.id as string);
+  const response = await inviteFriend(formData);
+  if (!response.success) {
+    console.error(response.err);
+  }
+}
 </script>
 
 <template>
   <div class="container relative">
     <video width="320" height="240" ref="remoteVideo" autoplay></video>
     <video width="320" height="240" ref="localVideo" autoplay></video>
-    <BaseButton @click="handleLeave" color="red" class="leave-button"
-      >Leave</BaseButton
-    >
+    <div class="buttons">
+      <BaseButton @click="dialogState = true">Invite friend</BaseButton>
+      <BaseButton @click="handleLeave" color="red">Leave</BaseButton>
+    </div>
   </div>
+  <BaseModal @close="dialogState = false" :dialog-state="dialogState">
+    <template #title>Invite friend</template>
+    <template #body>
+      <BaseInput
+        v-model="friendMail"
+        placeholder="Your name"
+        style="width: 100%"
+      />
+      <BaseInput
+        v-model="friendMail"
+        placeholder="Your frinend's mail"
+        style="width: 100%; margin-top: 10px"
+      />
+    </template>
+    <template #actions>
+      <BaseButton @click="invite">Invite</BaseButton>
+    </template>
+  </BaseModal>
 </template>
 
 <style scoped>
@@ -150,9 +186,11 @@ function handleLeave() {
 video {
   border: 1px solid #ccc;
 }
-.leave-button {
+.buttons {
   position: absolute;
+  display: flex;
+  gap: 10px;
   right: 0%;
-  bottom: -15%;
+  bottom: -17%;
 }
 </style>

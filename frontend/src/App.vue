@@ -15,6 +15,15 @@ import TheHeader from "@/components/app/TheHeader.vue";
 </template>
 
 <style>
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }

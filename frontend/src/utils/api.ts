@@ -5,7 +5,7 @@ class Api {
       return { success: true as const, data: (await response.json()).data };
     } catch (err) {
       console.error(err);
-      return { success: false, data: null };
+      return { success: false as const, err };
     }
   }
 }
