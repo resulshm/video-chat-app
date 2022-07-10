@@ -5,6 +5,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "allowJs": true,
+    "lib": ["esnext"],
     "paths": {
       "@/*": ["./src/*"]
     }

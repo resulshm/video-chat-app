@@ -1,10 +1,4 @@
-interface Message {
-  joined?: Boolean;
-  leave?: Boolean;
-  type?: "offer" | "answer" | "candidate";
-  offer?: RTCSessionDescriptionInit;
-  answer?: RTCSessionDescriptionInit;
-  candidate?: RTCIceCandidateInit;
+export interface Message {
+  type: "join" | "leave" | "offer" | "answer" | "candidate";
+  message: RTCSessionDescriptionInit & RTCIceCandidateInit;
 }
-
-export type { Message };

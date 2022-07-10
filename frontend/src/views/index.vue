@@ -6,12 +6,13 @@ export default {
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { createRoom } from "@/api/room";
-import BaseInput from "@/components/base/BaseInput.vue";
-import BaseButton from "@/components/base/BaseButton.vue";
+import { useFetch } from "@vueuse/core";
 import { useRouter } from "vue-router";
+
+const router = useRouter();
 const meetingCode = ref<string>("");
 const visibility = ref<"hidden" | "visible">("visible");
+
 watch(
   meetingCode,
   (v) => {
@@ -25,17 +26,18 @@ watch(
     immediate: true,
   }
 );
-const router = useRouter();
+
 async function onSubmit() {
-  const formData = new FormData();
-  formData.append("name", "New meet");
-  const response = await createRoom(formData);
-  if (!response.success) {
-    console.error(response.err);
+  const { data, error } = await useFetch("api/v1/room", {
+    method: "POST",
+  }).json();
+  if (error.value) {
+    console.error(error);
     return;
   }
-  router.push(`/${response.data.room_id}`);
+  router.push(`/${data.value.room_id}`);
 }
+
 function join() {
   router.push(`/${meetingCode.value}`);
 }
