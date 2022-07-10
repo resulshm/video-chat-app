@@ -4,13 +4,6 @@ import (
 	"errors"
 )
 
-type GeneralResponse struct {
-	Success    bool        `json:"success"`
-	StatusCode int         `json:"status"`
-	ErrMsg     string      `json:"err_msg"`
-	Data       interface{} `json:"data"`
-}
-
 type ResponseErrorCodeAndMessage struct {
 	ErrorCode    string  `json:"error_code"`
 	ErrorMessage *string `json:"error_msg,omitempty"`
@@ -63,10 +56,14 @@ const (
 	PG_CODE_UNIQUE_VIOLATION string = "23505"
 )
 
-func GetStatusCodeByError(err error) (statusCode int, errMsg string) {
+func GetStatusCodeByError(err error) (
+	statusCode int,
+	message struct {
+		ErrMsg string `json:"err_msg"`
+	}) {
 
 	statusCode = 200
-	errMsg = ErrorMessageOK
+	errMsg := ErrorMessageOK
 
 	switch err {
 	case ErrTfaRequired:
@@ -103,6 +100,10 @@ func GetStatusCodeByError(err error) (statusCode int, errMsg string) {
 		statusCode = 500
 		errMsg = ErrorMessageInternalServerError
 	}
+
+	message = struct {
+		ErrMsg string `json:"err_msg"`
+	}{ErrMsg: errMsg}
 
 	return
 }
