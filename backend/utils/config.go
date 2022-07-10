@@ -3,7 +3,6 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -14,7 +13,6 @@ import (
 type Config struct {
 	EmailConfig
 	ListenAddress string `json:"listen_address"`
-	DbConn        string `json:"db_conn"`
 }
 
 type EmailConfig struct {
@@ -54,14 +52,6 @@ func ReadConfig(source string) (err error) {
 	Conf = &Config{
 		ListenAddress: os.Getenv("LISTEN_ADDR"),
 		EmailConfig:   emailConfig,
-		DbConn: fmt.Sprintf(
-			"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
-			os.Getenv("DB_HOST"),
-			os.Getenv("DB_PORT"),
-			os.Getenv("DB_USER"),
-			os.Getenv("DB_PASSWORD"),
-			os.Getenv("DB_DATABASE"),
-		),
 	}
 
 	return

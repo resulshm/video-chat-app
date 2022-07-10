@@ -3,22 +3,13 @@ package web
 import (
 	"encoding/json"
 	"net/http"
-	"video-chat-app/datastore"
 	"video-chat-app/utils"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 )
 
-type Server struct {
-	pg *datastore.PgAccess
-}
-
-func NewServer(d *datastore.PgAccess) *Server {
-	return &Server{
-		pg: d,
-	}
-}
+type Server struct{}
 
 func NewRouter(s *Server) *mux.Router {
 	r := mux.NewRouter()

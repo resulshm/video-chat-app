@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"video-chat-app/datastore"
 	"video-chat-app/utils"
 	"video-chat-app/web"
 
@@ -38,13 +37,9 @@ func main() {
 }
 
 func setupServer(quit chan interface{}, signalChan chan os.Signal, conf *utils.Config) {
-	pg, err := datastore.NewPgAccess(conf)
-	if err != nil {
-		log.WithError(err).Panic("Couldn't initialize access to database")
-		return
-	}
-	s := web.NewServer(pg)
-	r := web.NewRouter(s)
+
+	s := web.Server{}
+	r := web.NewRouter(&s)
 
 	srv := &http.Server{
 		Addr:         conf.ListenAddress,
