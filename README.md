@@ -6,7 +6,6 @@
 
 - [Node](https://nodejs.org/en/download/)
 - [Go](https://go.dev/doc/install)
-- [PostgreSQL](https://www.postgresql.org/download/)
 
 # Frontend setup
 
@@ -38,15 +37,8 @@ npm run lint
 
 # Backend Setup
 
-- Create new PostgreSQL database;
-- `cd backend`
-- Then run this command with your PostgreSQL username and database name:
-
-```sh
-psql -U <username> -d <database name> -f db.sql
-```
-
-- Create your enviroment variables according to `.env-sample` and `config-sample.json`
+- Create your enviroment variables according to `.env-sample`
+- To invite friends via email, you need to add the email configuration as in the `config-sample.json`
 - To start server run:
 
 ```sh
@@ -61,6 +53,6 @@ go run main.go
 ## Features
 
 - ✅ P2P video call;
-- ⭕ Invite friends with email;
+- ✅ Invite friends with email;
 - ⭕ Chat;
 - and whatever comes to our crazy minds😜
